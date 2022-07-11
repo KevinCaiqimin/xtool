@@ -12,13 +12,15 @@
             "program": "${workspaceRoot}/main/main.go",
             "env": {},
             
-            "args": ["-app=enc" 
-                "-ind=encin_small" 
-                "-outd=encout", 
-                "-aesKey=IJNBhu87YGVFt654", 
-                "-aesIV=)(*&yuioPLKJhbnm",
-                // "-encFileExt",
-                "-encFileName"],
+            "args": ["-app=configexport", "-srcdir=../bin/testdata", "-cs", "-csdir=exportto/cs", "-lua", "-luadir=exportto/lua", "-usesheet", "-i=~*.xls"],
+            
+            // "args": ["-app=enc" 
+            //     "-ind=encin_small" 
+            //     "-outd=encout", 
+            //     "-aesKey=IJNBhu87YGVFt654", 
+            //     "-aesIV=)(*&yuioPLKJhbnm",
+            //     // "-encFileExt",
+            //     "-encFileName"],
 
             // "args": ["-app=dec" 
             //     "-ind=encout" 

@@ -9,7 +9,14 @@ import (
 	"time"
 
 	"github.com/KevinCaiqimin/go-basic/utils"
+	lua "github.com/yuin/gopher-lua"
 )
+
+var L *lua.LState
+
+func init() {
+	L = lua.NewState()
+}
 
 func toluaWriteNodeToBuf(tbl *ExportTable, node *ExportTreeNode, buf *bytes.Buffer, indent string) {
 	stepIndent := getIndent()
@@ -201,10 +208,19 @@ func tolua(file *ExportFile) error {
 	tablesContent := buf.String()
 	fileTempl = strings.Replace(fileTempl, "$tables", tablesContent, -1)
 
+	err = lua_validate(fileTempl)
+	if err != nil {
+		return fmt.Errorf("生成Lua代码校验出错`%v`，请检查配置", err)
+	}
+
 	os.MkdirAll(file.ExportToDir, os.ModePerm)
 	err = ioutil.WriteFile(file.ExportToDir+"/"+pureFileName+".lua", []byte(fileTempl), os.ModePerm)
 
 	return err
+}
+
+func lua_validate(content string) error {
+	return L.DoString(content)
 }
 
 func toluaUseSheet(file *ExportFile) error {
@@ -212,6 +228,10 @@ func toluaUseSheet(file *ExportFile) error {
 		tblContent, err := convertToLuaStr(file, tbl.Name, "", "template/tolua/file_tolua_usesheet.templ")
 		if err != nil {
 			return err
+		}
+		err = lua_validate(tblContent)
+		if err != nil {
+			return fmt.Errorf("生成Lua代码校验出错`%v`，请检查配置", err)
 		}
 		os.MkdirAll(file.ExportToDir, os.ModePerm)
 		err = ioutil.WriteFile(file.ExportToDir+"/"+tbl.Name+".lua", []byte(tblContent), os.ModePerm)

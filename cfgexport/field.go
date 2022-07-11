@@ -74,6 +74,9 @@ func (this *FieldType) TryParse(strVal string) (interface{}, error) {
 	case FIELD_TYPE_INT, FIELD_TYPE_FLOAT, FIELD_TYPE_STRING, FIELD_TYPE_BOOL:
 		return tryParseSimpleVal(this.Name, strVal)
 	case FIELD_TYPE_LUA:
+		if err := lua_validate(fmt.Sprintf("return {%v}", strVal)); err != nil {
+			return nil, fmt.Errorf("Lua语法错误: %v", err)
+		}
 		return mathext.TryParseStringVal(strVal)
 	case FIELD_TYPE_DIC:
 		keys, vals, err := tryParseDicData(this.Params[0], this.Params[1], strVal)

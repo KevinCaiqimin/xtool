@@ -31,11 +31,12 @@ type ExportConfig struct {
 }
 
 type ExportResult struct {
-	Total     int
-	IgnoreCnt int
-	SuccCnt   int
-	FailedCnt int
-	Err       error
+	Total       int
+	IgnoreCnt   int
+	SuccCnt     int
+	FailedCnt   int
+	Err         error
+	FailedFiles []string
 }
 
 func (this *ExportConfig) needIgnoreThisFile(fileName string) bool {
@@ -46,10 +47,7 @@ func (this *ExportConfig) needIgnoreThisFile(fileName string) bool {
 	ignore = strings.Replace(ignore, "*", ".*", -1)
 	reg := regexp.MustCompile(ignore)
 	strs := reg.FindAllString(fileName, -1)
-	if len(strs) > 0 {
-		return true
-	}
-	return false
+	return len(strs) > 0
 }
 
 func needSkipThisRow(sheet *msoffice.XlsSheet, line int) bool {
@@ -275,8 +273,8 @@ func exportToMap(tbl *ExportTable) (*ExportTreeNode, error) {
 			}
 			val, err := field.Typ.TryParse(fieldData)
 			if err != nil {
-				return nil, fmt.Errorf("[sheet: %v, col: %v, line: %v] invalid data",
-					sheet.Name, colName, l+1)
+				return nil, fmt.Errorf("[sheet: %v, col: %v, line: %v] invalid data: %v",
+					sheet.Name, colName, l+1, err)
 			}
 
 			row[fieldName] = val
@@ -366,18 +364,14 @@ func exportToFile(exportFile *ExportFile, exportTo string) error {
 
 func itsValidExportFile(fileName string) bool {
 	ext := path.Ext(fileName)
-	if ext == ".xlsx" {
-		return true
-	}
-	return false
+	return ext == ".xlsx"
 }
 
-func exportDir(srcdir, offsetDir string, expCfg *ExportConfig) *ExportResult {
-	result := &ExportResult{}
+func exportDir(srcdir, offsetDir string, expCfg *ExportConfig, result *ExportResult) {
 	files, err := ioutil.ReadDir(srcdir)
 	if err != nil {
 		result.Err = err
-		return result
+		return
 	}
 
 	total := 0
@@ -387,7 +381,7 @@ func exportDir(srcdir, offsetDir string, expCfg *ExportConfig) *ExportResult {
 	for _, file := range files {
 		filePath := srcdir + "/" + file.Name()
 		if file.IsDir() {
-			exportDir(filePath, offsetDir+"/"+file.Name(), expCfg)
+			exportDir(filePath, offsetDir+"/"+file.Name(), expCfg, result)
 		} else {
 			if !itsValidExportFile(file.Name()) {
 				continue
@@ -403,17 +397,20 @@ func exportDir(srcdir, offsetDir string, expCfg *ExportConfig) *ExportResult {
 				log.Info("Export file %v successfully", file.Name())
 				succCnt++
 			} else {
+				result.Err = err
 				log.Error("[%v] %v", filePath, err)
 				failedFiles = append(failedFiles, filePath)
 			}
+		}
+		if result.Err != nil {
+			return
 		}
 	}
 	result.Total = total
 	result.IgnoreCnt = ignoredCnt
 	result.SuccCnt = succCnt
-	result.FailedCnt = total - succCnt
-
-	return result
+	result.FailedCnt = total - succCnt - ignoredCnt
+	result.FailedFiles = failedFiles
 }
 
 func exportFile(fileName, offsetDir string, expCfg *ExportConfig) error {
@@ -492,16 +489,17 @@ func ExportCfg(expCfg *ExportConfig) error {
 		return nil
 	}
 
-	result := exportDir(expCfg.SrcDir, "", expCfg)
+	result := &ExportResult{}
+	exportDir(expCfg.SrcDir, "", expCfg, result)
 
 	if result.Err != nil || result.Total != result.SuccCnt {
 		if result.Err != nil {
-			log.Error("Export config failed with error: %v", result.Err)
+			log.Error("配置表导出失败: %v", result.Err)
 		} else {
 			log.Warn("Total: %v, Success: %v, Failed: %v, Ignored: %v", result.Total, result.SuccCnt, result.FailedCnt, result.IgnoreCnt)
 		}
 	} else {
-		log.Info("Export completly and succefully")
+		log.Info("配置表导出成功")
 	}
 
 	return nil
