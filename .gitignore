@@ -1,3 +1,5 @@
 main/export
+bin/exportto
 *.exe
 *.o
+~$*
