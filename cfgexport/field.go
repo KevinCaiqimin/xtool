@@ -2,15 +2,14 @@ package cfgexport
 
 import (
 	"fmt"
-	"strings"
-	"xtool/msoffice"
 	"regexp"
+	"strings"
 
-	"caiqimin.tech/basic/mathext"
-	// "caiqimin.tech/basic/xlog"
+	"github.com/KevinCaiqimin/xtool/msoffice"
+
+	"github.com/KevinCaiqimin/go-basic/mathext"
+	// "github.com/KevinCaiqimin/go-basic/xlog"
 )
-
-
 
 type FieldType struct {
 	Name   string
@@ -18,38 +17,38 @@ type FieldType struct {
 }
 
 type Field struct {
-	Name      string
-	Typ       *FieldType
-	Comment   string
-	ColIndex  int
-	IsPrimary bool
-	EnableDefault bool
+	Name           string
+	Typ            *FieldType
+	Comment        string
+	ColIndex       int
+	IsPrimary      bool
+	EnableDefault  bool
 	IsMultiPrimary bool //多主键
 }
 
 type ExportTreeNode struct {
-	FieldRef *Field
-	FieldValue interface{}
-	Children map[string]*ExportTreeNode
+	FieldRef       *Field
+	FieldValue     interface{}
+	Children       map[string]*ExportTreeNode
 	ChildrenKeySeq []string
 }
 
 type ExportTable struct {
-	Name             string
-	Fields           []*Field
-	FieldsByColIndex map[int]*Field
-	FieldsByName     map[string]*Field
-	PrimaryKeyFields []*Field
+	Name                  string
+	Fields                []*Field
+	FieldsByColIndex      map[int]*Field
+	FieldsByName          map[string]*Field
+	PrimaryKeyFields      []*Field
 	MultiPrimaryKeyFields []*Field
-	Sheet            *msoffice.XlsSheet
-	ContentRoot *ExportTreeNode
-	Content map[string]interface{}
+	Sheet                 *msoffice.XlsSheet
+	ContentRoot           *ExportTreeNode
+	Content               map[string]interface{}
 }
 
 type ExportFile struct {
-	FileName string
+	FileName    string
 	ExportToDir string
-	Tables map[string]*ExportTable
+	Tables      map[string]*ExportTable
 }
 
 func (this *FieldType) IsValidVal(strVal string) bool {

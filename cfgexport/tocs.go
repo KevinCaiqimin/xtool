@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"caiqimin.tech/basic/utils"
+	"github.com/KevinCaiqimin/go-basic/utils"
 )
 
 type CSVars struct {

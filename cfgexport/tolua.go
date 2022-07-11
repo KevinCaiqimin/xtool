@@ -1,13 +1,14 @@
 package cfgexport
 
 import (
+	"bytes"
 	"fmt"
 	"io/ioutil"
-	"bytes"
+	"os"
 	"strings"
 	"time"
-	"os"
-	"caiqimin.tech/basic/utils"
+
+	"github.com/KevinCaiqimin/go-basic/utils"
 )
 
 func toluaWriteNodeToBuf(tbl *ExportTable, node *ExportTreeNode, buf *bytes.Buffer, indent string) {
@@ -134,7 +135,7 @@ func toluaWriteNodeToBuf(tbl *ExportTable, node *ExportTreeNode, buf *bytes.Buff
 func convertToLuaStr(file *ExportFile, tblName, indent string, templFile string) (string, error) {
 	// linesRequire := 3
 	sheetTemplFilePath := templFile
-	
+
 	stepIndent := getIndent()
 
 	sheetTemplBuf, err := ioutil.ReadFile(sheetTemplFilePath)
@@ -148,12 +149,12 @@ func convertToLuaStr(file *ExportFile, tblName, indent string, templFile string)
 	tbl, _ := file.Tables[tblName]
 	var buf *bytes.Buffer = &bytes.Buffer{}
 
-	toluaWriteNodeToBuf(tbl, tbl.ContentRoot, buf, indent + stepIndent)
+	toluaWriteNodeToBuf(tbl, tbl.ContentRoot, buf, indent+stepIndent)
 	content := buf.String()
 
 	buf.Reset()
 	for _, field := range tbl.Fields {
-		buf.WriteString(fmt.Sprintf("%v%v: %v\n", indent + stepIndent, field.Name, field.Comment))
+		buf.WriteString(fmt.Sprintf("%v%v: %v\n", indent+stepIndent, field.Name, field.Comment))
 	}
 	comment := buf.String()
 
@@ -201,8 +202,8 @@ func tolua(file *ExportFile) error {
 	fileTempl = strings.Replace(fileTempl, "$tables", tablesContent, -1)
 
 	os.MkdirAll(file.ExportToDir, os.ModePerm)
-	err = ioutil.WriteFile(file.ExportToDir + "/" + pureFileName + ".lua", []byte(fileTempl), os.ModePerm)
-	
+	err = ioutil.WriteFile(file.ExportToDir+"/"+pureFileName+".lua", []byte(fileTempl), os.ModePerm)
+
 	return err
 }
 
@@ -213,11 +214,11 @@ func toluaUseSheet(file *ExportFile) error {
 			return err
 		}
 		os.MkdirAll(file.ExportToDir, os.ModePerm)
-		err = ioutil.WriteFile(file.ExportToDir + "/" + tbl.Name + ".lua", []byte(tblContent), os.ModePerm)
+		err = ioutil.WriteFile(file.ExportToDir+"/"+tbl.Name+".lua", []byte(tblContent), os.ModePerm)
 		if err != nil {
 			return err
 		}
 	}
-	
+
 	return nil
 }

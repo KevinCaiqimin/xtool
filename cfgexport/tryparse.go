@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	"caiqimin.tech/basic/mathext"
-	// "caiqimin.tech/basic/xlog"
+	"github.com/KevinCaiqimin/go-basic/mathext"
+	// "github.com/KevinCaiqimin/go-basic/xlog"
 )
 
 func selectAString(str string, idx int) (string, int, error) {
@@ -33,7 +33,7 @@ func selectAString(str string, idx int) (string, int, error) {
 
 func selectValue(valType, strVal string, idx int, terminator byte) (interface{}, int, error) {
 	lenS := len(strVal)
-	keyStr := strVal[idx : ]
+	keyStr := strVal[idx:]
 	newIdx := lenS
 	if strings.TrimSpace(keyStr) == "" {
 		return nil, lenS, nil
@@ -42,7 +42,7 @@ func selectValue(valType, strVal string, idx int, terminator byte) (interface{},
 	case FIELD_TYPE_INT:
 		for i := idx; i < lenS; i++ {
 			if strVal[i] == terminator {
-				keyStr = strVal[idx : i]
+				keyStr = strVal[idx:i]
 				newIdx = i + 1
 				break
 			}
@@ -55,7 +55,7 @@ func selectValue(valType, strVal string, idx int, terminator byte) (interface{},
 	case FIELD_TYPE_FLOAT:
 		for i := idx; i < lenS; i++ {
 			if strVal[i] == terminator {
-				keyStr = strVal[idx : i]
+				keyStr = strVal[idx:i]
 				newIdx = i + 1
 				break
 			}
@@ -82,7 +82,7 @@ func selectValue(valType, strVal string, idx int, terminator byte) (interface{},
 	case FIELD_TYPE_BOOL:
 		for i := idx; i < lenS; i++ {
 			if strVal[i] == terminator {
-				keyStr = strVal[idx : i]
+				keyStr = strVal[idx:i]
 				newIdx = i + 1
 				break
 			}
@@ -108,14 +108,14 @@ func selectDicVal(valType, strVal string, idx int) (interface{}, int, error) {
 func tryParseDicData(kType, vType, strVal string) (keys []interface{}, vals []interface{}, err error) {
 	lenS := len(strVal)
 	idx := 0
-	for ; idx < lenS; {
+	for idx < lenS {
 		k, newIdx, err := selectValue(kType, strVal, idx, '=')
 		if err != nil {
 			return nil, nil, err
 		}
 		idx = newIdx
 		if k == nil {
-			break 
+			break
 		}
 		v, newIdx, err := selectValue(vType, strVal, idx, ',')
 		if err != nil {
@@ -136,7 +136,7 @@ func tryParseArrayData(fieldType string, strVal string) (vals []interface{}, err
 	lenS := len(strVal)
 
 	idx := 0
-	for ; idx < lenS; {
+	for idx < lenS {
 		v, newIdx, err := selectValue(fieldType, strVal, idx, ',')
 		if err != nil {
 			return nil, err

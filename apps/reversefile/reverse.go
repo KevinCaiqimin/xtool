@@ -1,8 +1,9 @@
 package reversefile
 
 import (
-	"helloserver/log"
 	"io/ioutil"
+
+	"github.com/KevinCaiqimin/log"
 )
 
 func reverseFile(filePath string) error {

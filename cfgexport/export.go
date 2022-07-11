@@ -1,41 +1,44 @@
 package cfgexport
 
 import (
-	"helloserver/log"
 	"fmt"
 	"regexp"
 	"strings"
-	"xtool/msoffice"
-	// "caiqimin.tech/basic/xlog"
+
+	"github.com/KevinCaiqimin/log"
+
+	"github.com/KevinCaiqimin/xtool/msoffice"
+
+	// "github.com/KevinCaiqimin/go-basic/xlog"
+	"flag"
 	"io/ioutil"
 	"path"
-	"flag"
 )
 
 type ExportConfig struct {
-	Js bool
-	Jsdir string
-	Py bool
-	Pydir string
-	Lua bool
-	Luadir string
-	Cs bool
-	Csdir string
-	Ignore string
+	Js       bool
+	Jsdir    string
+	Py       bool
+	Pydir    string
+	Lua      bool
+	Luadir   string
+	Cs       bool
+	Csdir    string
+	Ignore   string
 	UseSheet bool
 
 	SrcDir string
 }
 
 type ExportResult struct {
-	Total int
+	Total     int
 	IgnoreCnt int
-	SuccCnt int
+	SuccCnt   int
 	FailedCnt int
-	Err error
+	Err       error
 }
 
-func (this *ExportConfig)needIgnoreThisFile(fileName string)(bool) {
+func (this *ExportConfig) needIgnoreThisFile(fileName string) bool {
 	if this.Ignore == "" {
 		return false
 	}
@@ -176,11 +179,11 @@ func validate(sheets []*msoffice.XlsSheet) (map[string]*ExportTable, error) {
 			}
 
 			field := &Field{
-				Name:      fieldName,
-				Typ:       fieldType,
-				Comment:   comment,
-				ColIndex:  c,
-				IsPrimary: isPrimary,
+				Name:           fieldName,
+				Typ:            fieldType,
+				Comment:        comment,
+				ColIndex:       c,
+				IsPrimary:      isPrimary,
 				IsMultiPrimary: isMultiPrimary,
 			}
 
@@ -242,9 +245,9 @@ func exportToMap(tbl *ExportTable) (*ExportTreeNode, error) {
 
 	mm := make(map[string]interface{})
 	contentRoot := &ExportTreeNode{
-		FieldRef: nil,
+		FieldRef:   nil,
 		FieldValue: nil,
-		Children: map[string]*ExportTreeNode{},
+		Children:   map[string]*ExportTreeNode{},
 	}
 
 	//check if field name is valid
@@ -255,7 +258,6 @@ func exportToMap(tbl *ExportTable) (*ExportTreeNode, error) {
 		if needSkipThisRow(sheet, l) {
 			continue
 		}
-
 
 		for c := 0; c < sheet.ColsNum; c++ {
 			field, exists := tbl.FieldsByColIndex[c]
@@ -274,7 +276,7 @@ func exportToMap(tbl *ExportTable) (*ExportTreeNode, error) {
 			val, err := field.Typ.TryParse(fieldData)
 			if err != nil {
 				return nil, fmt.Errorf("[sheet: %v, col: %v, line: %v] invalid data",
-					sheet.Name, colName, l + 1)
+					sheet.Name, colName, l+1)
 			}
 
 			row[fieldName] = val
@@ -285,20 +287,20 @@ func exportToMap(tbl *ExportTable) (*ExportTreeNode, error) {
 			for _, pkeyField := range tbl.MultiPrimaryKeyFields {
 				val, _ := row[pkeyField.Name]
 				valStr := fmt.Sprintf("%v", val)
-	
+
 				_, ok := node.Children[valStr]
 				if !ok {
 					node.Children[valStr] = &ExportTreeNode{
-						FieldRef: pkeyField,
+						FieldRef:   pkeyField,
 						FieldValue: val,
-						Children: map[string]*ExportTreeNode{},
+						Children:   map[string]*ExportTreeNode{},
 					}
 					node.ChildrenKeySeq = append(node.ChildrenKeySeq, valStr)
 				} else {
 					return nil, fmt.Errorf("[sheet: %v, line: %v] duplicated primary key found",
-						sheet.Name, l + 1)
+						sheet.Name, l+1)
 				}
-	
+
 				node.Children[valStr].FieldValue = row
 			}
 		} else {
@@ -316,7 +318,7 @@ func exportToMap(tbl *ExportTable) (*ExportTreeNode, error) {
 						tmp[valStr] = row
 					} else {
 						return nil, fmt.Errorf("[sheet: %v, line: %v] duplicated primary key found",
-							sheet.Name, l + 1)
+							sheet.Name, l+1)
 					}
 					break
 				}
@@ -327,17 +329,17 @@ func exportToMap(tbl *ExportTable) (*ExportTreeNode, error) {
 			for i, pkeyField := range tbl.PrimaryKeyFields {
 				val, _ := row[pkeyField.Name]
 				valStr := fmt.Sprintf("%v", val)
-	
+
 				_, ok := node.Children[valStr]
 				if !ok {
 					node.Children[valStr] = &ExportTreeNode{
-						FieldRef: pkeyField,
+						FieldRef:   pkeyField,
 						FieldValue: val,
-						Children: map[string]*ExportTreeNode{},
+						Children:   map[string]*ExportTreeNode{},
 					}
 					node.ChildrenKeySeq = append(node.ChildrenKeySeq, valStr)
 				}
-	
+
 				if i == len(tbl.PrimaryKeyFields)-1 {
 					node.Children[valStr].FieldValue = row
 				}
@@ -385,7 +387,7 @@ func exportDir(srcdir, offsetDir string, expCfg *ExportConfig) *ExportResult {
 	for _, file := range files {
 		filePath := srcdir + "/" + file.Name()
 		if file.IsDir() {
-			exportDir(filePath, offsetDir + "/" + file.Name(), expCfg)
+			exportDir(filePath, offsetDir+"/"+file.Name(), expCfg)
 		} else {
 			if !itsValidExportFile(file.Name()) {
 				continue
@@ -424,8 +426,8 @@ func exportFile(fileName, offsetDir string, expCfg *ExportConfig) error {
 		return err
 	}
 	exportFile := &ExportFile{
-		FileName: fileName,
-		Tables: mtbls,
+		FileName:    fileName,
+		Tables:      mtbls,
 		ExportToDir: "",
 	}
 	for _, tbl := range mtbls {

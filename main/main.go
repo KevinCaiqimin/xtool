@@ -3,13 +3,15 @@ package main
 import (
 	"flag"
 	"fmt"
-	"xtool/cfgexport"
+
+	"github.com/KevinCaiqimin/xtool/cfgexport"
 
 	// "os"
-	"helloserver/log"
-	"xtool/apps/reversefile"
-	"xtool/filedecrypt"
-	"xtool/fileencrypt"
+	"github.com/KevinCaiqimin/log"
+
+	"github.com/KevinCaiqimin/xtool/apps/reversefile"
+	"github.com/KevinCaiqimin/xtool/filedecrypt"
+	"github.com/KevinCaiqimin/xtool/fileencrypt"
 )
 
 var app = flag.String("app", "", "app to be run")

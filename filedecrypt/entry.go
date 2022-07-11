@@ -1,6 +1,6 @@
 package filedecrypt
 
-import "helloserver/log"
+import "github.com/KevinCaiqimin/log"
 
 func Start(srcFile, dstFile, srcDir, dstDir string) {
 	if srcFile != "" {

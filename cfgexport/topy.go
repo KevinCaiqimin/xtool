@@ -1,13 +1,14 @@
 package cfgexport
 
 import (
+	"bytes"
 	"fmt"
 	"io/ioutil"
-	"bytes"
+	"os"
 	"strings"
 	"time"
-	"os"
-	"caiqimin.tech/basic/utils"
+
+	"github.com/KevinCaiqimin/go-basic/utils"
 )
 
 func topyWriteNodeToBuf(tbl *ExportTable, node *ExportTreeNode, buf *bytes.Buffer, indent string) {
@@ -134,7 +135,7 @@ func topyWriteNodeToBuf(tbl *ExportTable, node *ExportTreeNode, buf *bytes.Buffe
 func convertToPyStr(file *ExportFile, tblName, indent string, templFile string) (string, error) {
 	// linesRequire := 3
 	sheetTemplFilePath := templFile
-	
+
 	stepIndent := getIndent()
 
 	sheetTemplBuf, err := ioutil.ReadFile(sheetTemplFilePath)
@@ -148,15 +149,15 @@ func convertToPyStr(file *ExportFile, tblName, indent string, templFile string) 
 	tbl, _ := file.Tables[tblName]
 	var buf *bytes.Buffer = &bytes.Buffer{}
 
-	topyWriteNodeToBuf(tbl, tbl.ContentRoot, buf, indent + stepIndent)
+	topyWriteNodeToBuf(tbl, tbl.ContentRoot, buf, indent+stepIndent)
 	content := buf.String()
 
 	buf.Reset()
-	buf.WriteString(fmt.Sprintf("%v#===========================\n", indent + stepIndent))
+	buf.WriteString(fmt.Sprintf("%v#===========================\n", indent+stepIndent))
 	for _, field := range tbl.Fields {
-		buf.WriteString(fmt.Sprintf("%v#%v: %v\n", indent + stepIndent, field.Name, field.Comment))
+		buf.WriteString(fmt.Sprintf("%v#%v: %v\n", indent+stepIndent, field.Name, field.Comment))
 	}
-	buf.WriteString(fmt.Sprintf("%v#===========================\n", indent + stepIndent))
+	buf.WriteString(fmt.Sprintf("%v#===========================\n", indent+stepIndent))
 	comment := buf.String()
 
 	now := time.Now()
@@ -203,15 +204,13 @@ func topy(file *ExportFile) error {
 	fileTempl = strings.Replace(fileTempl, "$tables", tablesContent, -1)
 
 	os.MkdirAll(file.ExportToDir, os.ModePerm)
-	err = ioutil.WriteFile(file.ExportToDir + "/" + pureFileName + ".py", []byte(fileTempl), os.ModePerm)
+	err = ioutil.WriteFile(file.ExportToDir+"/"+pureFileName+".py", []byte(fileTempl), os.ModePerm)
 	if err != nil {
 		return err
 	}
 
 	//export init
 
-
-	
 	return err
 }
 
@@ -222,7 +221,7 @@ func topyUseSheet(file *ExportFile) error {
 			return err
 		}
 		os.MkdirAll(file.ExportToDir, os.ModePerm)
-		err = ioutil.WriteFile(file.ExportToDir + "/" + tbl.Name + ".py", []byte(tblContent), os.ModePerm)
+		err = ioutil.WriteFile(file.ExportToDir+"/"+tbl.Name+".py", []byte(tblContent), os.ModePerm)
 		if err != nil {
 			return err
 		}

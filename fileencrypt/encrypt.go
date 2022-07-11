@@ -1,14 +1,15 @@
 package fileencrypt
 
 import (
-	"helloserver/log"
 	"io/ioutil"
 	"path"
 	"strings"
 
-	"caiqimin.tech/basic/encrypt"
-	"caiqimin.tech/basic/utils"
-	"github.com/datadog/zstd"
+	"github.com/KevinCaiqimin/log"
+
+	"github.com/DataDog/zstd"
+	"github.com/KevinCaiqimin/go-basic/encrypt"
+	"github.com/KevinCaiqimin/go-basic/utils"
 )
 
 var AES_KEY string

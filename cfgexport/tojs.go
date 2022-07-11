@@ -1,13 +1,14 @@
 package cfgexport
 
 import (
+	"bytes"
 	"fmt"
 	"io/ioutil"
-	"bytes"
+	"os"
 	"strings"
 	"time"
-	"os"
-	"caiqimin.tech/basic/utils"
+
+	"github.com/KevinCaiqimin/go-basic/utils"
 )
 
 func tojsWriteNodeToBuf(tbl *ExportTable, node *ExportTreeNode, buf *bytes.Buffer, indent string) {
@@ -134,7 +135,7 @@ func tojsWriteNodeToBuf(tbl *ExportTable, node *ExportTreeNode, buf *bytes.Buffe
 func convertToJsStr(file *ExportFile, tblName, indent string, templFile string) (string, error) {
 	// linesRequire := 3
 	sheetTemplFilePath := templFile
-	
+
 	stepIndent := getIndent()
 
 	sheetTemplBuf, err := ioutil.ReadFile(sheetTemplFilePath)
@@ -148,12 +149,12 @@ func convertToJsStr(file *ExportFile, tblName, indent string, templFile string) 
 	tbl, _ := file.Tables[tblName]
 	var buf *bytes.Buffer = &bytes.Buffer{}
 
-	tojsWriteNodeToBuf(tbl, tbl.ContentRoot, buf, indent + stepIndent)
+	tojsWriteNodeToBuf(tbl, tbl.ContentRoot, buf, indent+stepIndent)
 	content := buf.String()
 
 	buf.Reset()
 	for _, field := range tbl.Fields {
-		buf.WriteString(fmt.Sprintf("%v%v: %v\n", indent + stepIndent, field.Name, field.Comment))
+		buf.WriteString(fmt.Sprintf("%v%v: %v\n", indent+stepIndent, field.Name, field.Comment))
 	}
 	comment := buf.String()
 
@@ -190,7 +191,7 @@ func tojs(file *ExportFile) error {
 
 	var buf bytes.Buffer
 	for _, tbl := range file.Tables {
-		tblContent, err := convertToJsStr(file, tbl.Name, 
+		tblContent, err := convertToJsStr(file, tbl.Name,
 			indent, "template/tojs/sheet_tojs.templ")
 		if err != nil {
 			return err
@@ -202,8 +203,8 @@ func tojs(file *ExportFile) error {
 	fileTempl = strings.Replace(fileTempl, "$tables", tablesContent, -1)
 
 	os.MkdirAll(file.ExportToDir, os.ModePerm)
-	err = ioutil.WriteFile(file.ExportToDir + "/" + pureFileName + ".js", []byte(fileTempl), os.ModePerm)
-	
+	err = ioutil.WriteFile(file.ExportToDir+"/"+pureFileName+".js", []byte(fileTempl), os.ModePerm)
+
 	return err
 }
 
@@ -214,11 +215,11 @@ func tojsUseSheet(file *ExportFile) error {
 			return err
 		}
 		os.MkdirAll(file.ExportToDir, os.ModePerm)
-		err = ioutil.WriteFile(file.ExportToDir + "/" + tbl.Name + ".js", []byte(tblContent), os.ModePerm)
+		err = ioutil.WriteFile(file.ExportToDir+"/"+tbl.Name+".js", []byte(tblContent), os.ModePerm)
 		if err != nil {
 			return err
 		}
 	}
-	
+
 	return nil
 }

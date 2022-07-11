@@ -5,10 +5,10 @@ import (
 )
 
 type XlsSheet struct {
-	Name string
-	ColsNum int
+	Name     string
+	ColsNum  int
 	LinesNum int
-	Cells [][]string
+	Cells    [][]string
 }
 
 //ReadAllExcelData read all cells in string format and output
@@ -32,20 +32,17 @@ func ReadAllExcelData(fileName string) ([]*XlsSheet, error) {
 			}
 			rowData := []string{}
 			for _, cell := range row.Cells {
-				val, err := cell.String()
-				if err != nil {
-					return nil, err
-				}
+				val := cell.String()
 				//convert special characters
 				rowData = append(rowData, val)
 			}
 			cells = append(cells, rowData)
 		}
 		sheetData := &XlsSheet{
-			Name: name,
-			ColsNum: colsNum,
+			Name:     name,
+			ColsNum:  colsNum,
 			LinesNum: linesNum,
-			Cells: cells,
+			Cells:    cells,
 		}
 		sheets = append(sheets, sheetData)
 	}
