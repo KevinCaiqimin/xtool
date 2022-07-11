@@ -1,0 +1,1 @@
+go build -o xtool.exe ../main/main.go

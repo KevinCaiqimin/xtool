@@ -1,0 +1,9 @@
+$colName #列名称
+$comment #注释
+$fileName #文件名
+$sheetName #表名
+$exportTime #时间日期
+$content #单个表导出内容
+$tables #整个excel文件导出内容
+
+$colComment=--$colName: $comment #列注释
